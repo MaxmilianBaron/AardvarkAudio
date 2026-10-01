@@ -24,4 +24,4 @@ Layer I/II, damaged-frame concealment, MP3 format changes midstream, RF64 chunk-
 python tests/reference.py build/aardvark_decode
 ```
 
-On Visual Studio builds use `build/Release/aardvark_decode.exe`. FFmpeg with libmp3lame is needed only for reference tests. Format constants follow ISO/IEC 11172-3 and ISO/IEC 13818-3; no encoder or playback device is included.
+On Visual Studio builds use `build/Release/aardvark_decode.exe`. FFmpeg 8.1 with libmp3lame is needed only for reference tests; older versions use different IMA ADPCM rounding. Format constants follow ISO/IEC 11172-3 and ISO/IEC 13818-3; no encoder or playback device is included.

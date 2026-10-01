@@ -166,7 +166,11 @@ def main():
     decoder = args.decoder.resolve()
     ffmpeg = shutil.which('ffmpeg')
     if not ffmpeg:
-        raise SystemExit('FFmpeg with libmp3lame is required for reference tests')
+        raise SystemExit('FFmpeg 8.1 with libmp3lame is required for reference tests')
+    version = run([ffmpeg, '-version']).decode(errors='replace').splitlines()[0]
+    match = re.search(r'ffmpeg version n?(\d+)\.(\d+)', version)
+    if not match or tuple(map(int, match.groups())) < (8, 1):
+        raise SystemExit('FFmpeg 8.1 or newer is required for IMA ADPCM reference rounding: ' + version)
     report = []
     with tempfile.TemporaryDirectory(prefix='aardvark-audio-') as directory:
         work = Path(directory)

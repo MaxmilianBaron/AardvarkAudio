@@ -38,7 +38,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - uses: actions/checkout@v4
+        with:
+          repository: FFmpeg/FFmpeg
+          ref: 9047fa1b084f76b1b4d065af2d743df1b40dfb56
+          path: build-ffmpeg
+      - run: sudo apt-get update && sudo apt-get install -y libmp3lame-dev
+      - working-directory: build-ffmpeg
+        run: |
+          ./configure --disable-doc --disable-debug --disable-network --disable-autodetect --disable-everything --disable-x86asm --enable-ffmpeg --enable-libmp3lame --enable-protocol=file,pipe --enable-demuxer=wav,mp3 --enable-muxer=wav,mp3,pcm_s16le --enable-decoder=pcm_u8,pcm_s16le,pcm_s24le,pcm_s32le,pcm_f32le,pcm_f64le,pcm_alaw,pcm_mulaw,adpcm_ima_wav,adpcm_ms,mp3float --enable-encoder=pcm_u8,pcm_s16le,pcm_s24le,pcm_s32le,pcm_f32le,pcm_f64le,pcm_alaw,pcm_mulaw,adpcm_ima_wav,adpcm_ms,libmp3lame --enable-filter=aresample,aformat,anull
+          make -j2
+          echo "$PWD" >> "$GITHUB_PATH"
       - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DAARDVARK_AUDIO_SANITIZERS=ON
       - run: cmake --build build --parallel
       - run: ctest --test-dir build --output-on-failure

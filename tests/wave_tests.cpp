@@ -139,6 +139,13 @@ static Bytes adpcm(unsigned tag, unsigned channels, unsigned align, unsigned fra
 }
 
 static void compressed() {
+    {
+        auto file = adpcm(17,1,8,9,{0,0,0,0,0x11,0x11,0x11,0x11});
+        Reader reader;
+        std::array<std::int16_t,9> output{};
+        check(reader.open(file.data(),file.size()) && reader.read_s16(output.data(),9)==9, "IMA rounding fixture");
+        check(output==std::array<std::int16_t,9>{0,1,2,3,4,5,6,7,8}, "IMA per-bit truncation");
+    }
     for (unsigned channels : {1u,2u}) {
         auto file = adpcm(17,channels,channels*8,9,Bytes(channels*8));
         Reader reader;
