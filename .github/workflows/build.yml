@@ -35,7 +35,7 @@ jobs:
       - run: cmake -S tests/consumer -B consumer -DCMAKE_PREFIX_PATH="$PWD/install"
       - run: cmake --build consumer && ./consumer/audio_consumer
   reference:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
@@ -43,7 +43,12 @@ jobs:
           repository: FFmpeg/FFmpeg
           ref: 9047fa1b084f76b1b4d065af2d743df1b40dfb56
           path: build-ffmpeg
-      - run: sudo apt-get update && sudo apt-get install -y libmp3lame-dev
+      - name: Install reference encoder headers
+        timeout-minutes: 3
+        run: |
+          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
+          sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 update
+          sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install -y --no-install-recommends libmp3lame-dev
       - working-directory: build-ffmpeg
         run: |
           git fetch --depth 1 origin tag n8.1
