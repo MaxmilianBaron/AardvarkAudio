@@ -46,6 +46,8 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y libmp3lame-dev
       - working-directory: build-ffmpeg
         run: |
+          git fetch --depth 1 origin tag n8.1
+          test "$(git rev-parse 'n8.1^{commit}')" = 9047fa1b084f76b1b4d065af2d743df1b40dfb56
           ./configure --disable-doc --disable-debug --disable-network --disable-autodetect --disable-everything --disable-x86asm --enable-ffmpeg --enable-libmp3lame --enable-protocol=file,pipe --enable-demuxer=wav,mp3 --enable-muxer=wav,mp3,pcm_s16le --enable-decoder=pcm_u8,pcm_s16le,pcm_s24le,pcm_s32le,pcm_f32le,pcm_f64le,pcm_alaw,pcm_mulaw,adpcm_ima_wav,adpcm_ms,mp3float --enable-encoder=pcm_u8,pcm_s16le,pcm_s24le,pcm_s32le,pcm_f32le,pcm_f64le,pcm_alaw,pcm_mulaw,adpcm_ima_wav,adpcm_ms,libmp3lame --enable-filter=aresample,aformat,anull
           make -j2
           echo "$PWD" >> "$GITHUB_PATH"
