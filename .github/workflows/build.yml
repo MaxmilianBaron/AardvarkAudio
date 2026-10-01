@@ -1,0 +1,45 @@
+name: Build
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [Win32, x64]
+        shared: [OFF, ON]
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S . -B build -A ${{ matrix.arch }} -DBUILD_SHARED_LIBS=${{ matrix.shared }}
+      - run: cmake --build build --config Release
+      - run: ctest --test-dir build -C Release --output-on-failure
+      - run: cmake --install build --config Release --prefix install
+      - run: cmake -S tests/consumer -B consumer -A ${{ matrix.arch }} -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install"
+      - run: cmake --build consumer --config Release
+      - shell: pwsh
+        run: |
+          $env:PATH = "$PWD/install/bin;" + $env:PATH
+          ./consumer/Release/audio_consumer.exe
+  portable:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
+      - run: cmake --build build --parallel
+      - run: ctest --test-dir build --output-on-failure
+      - run: cmake --install build --prefix "$PWD/install"
+      - run: cmake -S tests/consumer -B consumer -DCMAKE_PREFIX_PATH="$PWD/install"
+      - run: cmake --build consumer && ./consumer/audio_consumer
+  reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DAARDVARK_AUDIO_SANITIZERS=ON
+      - run: cmake --build build --parallel
+      - run: ctest --test-dir build --output-on-failure
+      - run: python3 tests/reference.py build/aardvark_decode

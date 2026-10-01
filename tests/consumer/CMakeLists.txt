@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.20)
+project(AudioConsumer LANGUAGES CXX)
+find_package(AardvarkAudio 0.1 CONFIG REQUIRED)
+add_executable(audio_consumer main.cpp)
+target_link_libraries(audio_consumer PRIVATE AardvarkAudio::aardvark_audio)
