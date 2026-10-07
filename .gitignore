@@ -1,0 +1,14 @@
+/build*/
+/out/
+*.user
+*.obj
+*.pdb
+*.ilk
+*.exe
+*.lib
+*.dll
+__pycache__/
+/tests/
+/docs/
+/examples/
+/.clang-format
